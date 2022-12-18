@@ -6,33 +6,44 @@ import pathlib
 
 mixer.init()
 
-paused = True
-
 root = tkinter.Tk()
 root.title("Moosic")
-sv_ttk.set_theme("light")
+sv_ttk.set_theme("dark")
+
+next_light = tkinter.PhotoImage(file="assets/next_dark.png")
+next_dark = tkinter.PhotoImage(file="assets/next_light.png")
+pause_light = tkinter.PhotoImage(file="assets/pause_dark.png")
+pause_dark = tkinter.PhotoImage(file="assets/pause_light.png")
+play_light = tkinter.PhotoImage(file="assets/play_dark.png")
+play_dark = tkinter.PhotoImage(file="assets/play_light.png")
+previous_light = tkinter.PhotoImage(file="assets/previous_dark.png")
+previous_dark = tkinter.PhotoImage(file="assets/previous_light.png")
 
 def playsong():
-    global paused
-    filepath = filedialog.askopenfilename()
-
-    mixer.music.load(str(pathlib.Path(filepath)))
+    mixer.music.load(str(pathlib.Path(filedialog.askopenfilename())))
     mixer.music.play()
 
-    paused = False
+def updateicon():
+    if mixer.music.get_busy():
+        btn1.configure(image=eval("pause_" + sv_ttk.get_theme()))
+    else:
+        btn1.configure(image=eval("play_" + sv_ttk.get_theme()))
+
+    root.after(1000, updateicon)
 
 def playpause():
-    global paused
-
-    if paused:
-        mixer.music.unpause()
-        paused = False
-    else:
+    if mixer.music.get_busy():
         mixer.music.pause()
-        paused = True
+    else:
+        mixer.music.unpause()
+
+    updateicon()
+
 
 
 
 btn = ttk.Button(root, text="Play song", command=playsong).pack()
-btn1 = ttk.Button(root, text="Play / Pause", command=playpause).pack()
+btn1 = ttk.Button(root, command=playpause, image=eval("play_" + sv_ttk.get_theme()))
+btn1.pack()
+root.after(1000, updateicon)
 root.mainloop()
