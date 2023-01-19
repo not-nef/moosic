@@ -4,6 +4,8 @@ from tkinter import ttk, filedialog
 from pygame import mixer
 import pathlib
 
+nowplaying = ""
+
 mixer.init()
 
 root = tkinter.Tk()
@@ -20,16 +22,23 @@ previous_light = tkinter.PhotoImage(file="assets/previous_dark.png")
 previous_dark = tkinter.PhotoImage(file="assets/previous_light.png")
 
 def playsong():
-    mixer.music.load(str(pathlib.Path(filedialog.askopenfilename())))
+    global nowplaying
+    file = filedialog.askopenfilename()
+    mixer.music.load(file)
     mixer.music.play()
+    nowplaying = file
+    print(nowplaying)
 
-def updateicon():
+def refresh():
     if mixer.music.get_busy():
         btn1.configure(image=eval("pause_" + sv_ttk.get_theme()))
     else:
         btn1.configure(image=eval("play_" + sv_ttk.get_theme()))
 
-    root.after(1000, updateicon)
+    if nowplaying:
+        lbl.configure(text="Now Playing: {}".format(nowplaying.split("/")[-1].split(".")[0]))
+
+    root.after(1000, refresh)
 
 def playpause():
     if mixer.music.get_busy():
@@ -37,7 +46,7 @@ def playpause():
     else:
         mixer.music.unpause()
 
-    updateicon()
+    refresh()
 
 
 
@@ -45,5 +54,7 @@ def playpause():
 btn = ttk.Button(root, text="Play song", command=playsong).pack()
 btn1 = ttk.Button(root, command=playpause, image=eval("play_" + sv_ttk.get_theme()))
 btn1.pack()
-root.after(1000, updateicon)
+lbl = tkinter.Label(root, text="Now Playing:")
+lbl.pack()
+root.after(1000, refresh)
 root.mainloop()
